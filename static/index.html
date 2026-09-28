@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS Hospital Management System | Enterprise Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid font-awesome-hospital fa-hospital"></i>
+            </div>
+            <div>
+                <div class="brand-title">MS Hospital</div>
+                <div style="font-size: 0.72rem; color: var(--text-secondary);">Hospital Operations</div>
+            </div>
+        </div>
+
+        <ul class="nav-list">
+            <li class="nav-item active">
+                <button onclick="switchView('dashboard', this)">
+                    <i class="fa-solid fa-chart-pie"></i> Executive Dashboard
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('patients', this)">
+                    <i class="fa-solid fa-user-injured"></i> Patients Registry
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('doctors', this)">
+                    <i class="fa-solid fa-user-doctor"></i> Doctors & Medical Staff
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('appointments', this)">
+                    <i class="fa-solid fa-calendar-check"></i> Appointments
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('records', this)">
+                    <i class="fa-solid fa-file-medical"></i> Medical Records
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('billing', this)">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Billing & Finance
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('rooms', this)">
+                    <i class="fa-solid fa-bed"></i> Wards & Departments
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('sql-console', this)">
+                    <i class="fa-solid fa-database"></i> Live SQL Console
+                </button>
+            </li>
+            <li class="nav-item">
+                <button onclick="switchView('requirements', this)">
+                    <i class="fa-solid fa-list-check"></i> Activity A2.1 Specs
+                </button>
+            </li>
+        </ul>
+
+        <div class="system-status">
+            <span class="status-indicator"></span> SQLite DB Online & Connected
+            <div style="margin-top: 4px; font-size: 0.7rem; color: var(--text-muted);">Centralized Node: Localhost</div>
+        </div>
+    </aside>
+
+    <!-- Main Application Wrapper -->
+    <div class="main-wrapper">
+        <!-- Topbar Header -->
+        <header class="topbar">
+            <h1 class="page-title" id="page-heading">Executive Dashboard</h1>
+
+            <div class="topbar-actions">
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-patient')">
+                    <i class="fa-solid fa-plus"></i> New Patient
+                </button>
+
+                <div class="user-profile">
+                    <div class="avatar">AD</div>
+                    <div class="user-info">
+                        <span class="user-name">Chief Administrator</span>
+                        <span class="user-role">Full Access Authorized</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="content-area">
+
+            <!-- 1. DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-panel active">
+                <!-- Patient Name Entry & Quick Search Hero Section -->
+                <div class="dashboard-hero-card" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(99, 102, 241, 0.12) 100%); border: 1px solid rgba(14, 165, 233, 0.3); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin-bottom: 0.2rem; color: white;">
+                                <i class="fa-solid fa-magnifying-glass-pulse" style="color: var(--accent-blue);"></i> Instant Patient Entry & Search
+                            </h2>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Enter a patient name to instantly view health history, schedule consultations, or register new admissions.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openQuickRegister()">
+                            <i class="fa-solid fa-user-plus"></i> Register Patient
+                        </button>
+                    </div>
+
+                    <!-- Patient Name Input Control -->
+                    <div style="margin-top: 1rem; position: relative;">
+                        <div style="display: flex; gap: 10px;">
+                            <div style="position: relative; flex: 1;">
+                                <i class="fa-solid fa-user-astronaut" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--accent-blue); font-size: 1.1rem;"></i>
+                                <input type="text" id="dash-patient-input" class="form-control" style="padding-left: 46px; height: 48px; font-size: 1rem; border-radius: var(--radius-md); border-color: rgba(14, 165, 233, 0.4);" placeholder="Enter patient name (e.g. John Doe, Alice Smith, Michael Brown)..." oninput="handleDashboardPatientSearch(this.value)">
+                            </div>
+                            <button class="btn btn-primary" style="padding: 0 1.5rem; height: 48px;" onclick="searchDashboardPatient()">
+                                <i class="fa-solid fa-magnifying-glass"></i> Search
+                            </button>
+                        </div>
+
+                        <!-- Instant Patient Dropdown Result Box -->
+                        <div id="dash-patient-results" style="display: none; background: #0f172a; border: 1px solid var(--accent-blue); border-radius: var(--radius-md); margin-top: 8px; box-shadow: var(--shadow-card); max-height: 320px; overflow-y: auto; z-index: 50; position: absolute; width: 100%;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <h4>Total Registered Patients</h4>
+                            <div class="metric-value" id="stat-patients">0</div>
+                        </div>
+                        <div class="metric-icon blue"><i class="fa-solid fa-users"></i></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <h4>Active Medical Staff</h4>
+                            <div class="metric-value" id="stat-doctors">0</div>
+                        </div>
+                        <div class="metric-icon green"><i class="fa-solid fa-user-doctor"></i></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <h4>Today's Appointments</h4>
+                            <div class="metric-value" id="stat-appointments">0</div>
+                        </div>
+                        <div class="metric-icon purple"><i class="fa-solid fa-calendar-day"></i></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <h4>Revenue Realized</h4>
+                            <div class="metric-value" id="stat-revenue">$0.00</div>
+                        </div>
+                        <div class="metric-icon amber"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+                    <!-- Recent Appointments -->
+                    <div class="table-container">
+                        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Consultation Queue</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="switchView('appointments')">View All</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Time Slot</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-recent-appointments">
+                                <tr><td colspan="4" style="text-align:center;">Loading records...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Room Occupancy & Department Distribution -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="metric-card" style="flex-direction: column; align-items: flex-start;">
+                            <h4 style="color: var(--text-secondary); margin-bottom: 10px;">Inpatient Ward Occupancy Rate</h4>
+                            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                                <span class="metric-value" id="stat-occupancy">0%</span>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);" id="stat-rooms-detail">0 / 0 Beds Occupied</span>
+                            </div>
+                            <div style="width: 100%; background: #1e293b; height: 10px; border-radius: 5px; margin-top: 12px; overflow: hidden;">
+                                <div id="stat-occupancy-bar" style="width: 0%; height: 100%; background: var(--gradient-primary); transition: width 0.5s ease;"></div>
+                            </div>
+                        </div>
+
+                        <div class="table-container" style="margin-bottom: 0;">
+                            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color);">
+                                <h3 class="section-title"><i class="fa-solid fa-sitemap"></i> Department Breakdown</h3>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Department</th>
+                                        <th>Doctors</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dash-dept-stats">
+                                    <tr><td colspan="2" style="text-align:center;">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. PATIENTS REGISTRY VIEW -->
+            <section id="view-patients" class="view-panel">
+                <div class="section-header">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                        <input type="text" id="patient-search" placeholder="Search by name, phone, blood type..." oninput="fetchPatients()">
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modal-patient')">
+                        <i class="fa-solid fa-plus"></i> Register Patient
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>DOB / Gender</th>
+                                <th>Blood Group</th>
+                                <th>Contact Number</th>
+                                <th>Care Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patients-table-body">
+                            <tr><td colspan="7" style="text-align:center;">Loading patient database...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. DOCTORS & STAFF VIEW -->
+            <section id="view-doctors" class="view-panel">
+                <div class="section-header">
+                    <h2 class="section-title">Medical Staff Roster & Specialists</h2>
+                    <button class="btn btn-primary" onclick="openModal('modal-doctor')">
+                        <i class="fa-solid fa-user-plus"></i> Add Doctor Profile
+                    </button>
+                </div>
+                <div class="cards-grid" id="doctors-grid">
+                    <!-- Dynamic doctor cards -->
+                </div>
+            </section>
+
+            <!-- 4. APPOINTMENTS SCHEDULER VIEW -->
+            <section id="view-appointments" class="view-panel">
+                <div class="section-header">
+                    <h2 class="section-title">Centralized Consultation Schedule</h2>
+                    <button class="btn btn-primary" onclick="openModal('modal-appointment')">
+                        <i class="fa-solid fa-calendar-plus"></i> Schedule Appointment
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Appt ID</th>
+                                <th>Patient</th>
+                                <th>Assigned Doctor</th>
+                                <th>Department</th>
+                                <th>Date & Slot</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-table-body">
+                            <tr><td colspan="8" style="text-align:center;">Loading appointments schedule...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5. MEDICAL RECORDS VIEW -->
+            <section id="view-records" class="view-panel">
+                <div class="section-header">
+                    <h2 class="section-title">Electronic Health Records & Diagnoses</h2>
+                    <button class="btn btn-primary" onclick="openModal('modal-record')">
+                        <i class="fa-solid fa-notes-medical"></i> Log Clinical Note
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Record ID</th>
+                                <th>Patient Name</th>
+                                <th>Attending Doctor</th>
+                                <th>Record Date</th>
+                                <th>Clinical Diagnosis</th>
+                                <th>Prescribed Medication</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-table-body">
+                            <tr><td colspan="6" style="text-align:center;">Loading EHR records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 6. BILLING & FINANCE VIEW -->
+            <section id="view-billing" class="view-panel">
+                <div class="section-header">
+                    <h2 class="section-title">Financial Billing & Payment Ledger</h2>
+                    <button class="btn btn-primary" onclick="openModal('modal-billing')">
+                        <i class="fa-solid fa-receipt"></i> Generate Invoice
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Bill ID</th>
+                                <th>Patient Name</th>
+                                <th>Invoice Date</th>
+                                <th>Gross Amount</th>
+                                <th>Discount</th>
+                                <th>Net Amount</th>
+                                <th>Payment Mode</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billing-table-body">
+                            <tr><td colspan="9" style="text-align:center;">Loading billing records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 7. WARDS & ROOMS VIEW -->
+            <section id="view-rooms" class="view-panel">
+                <div class="section-header">
+                    <h2 class="section-title">Ward Management & Room Inventory</h2>
+                </div>
+                <div class="cards-grid" id="rooms-grid">
+                    <!-- Dynamic room cards -->
+                </div>
+            </section>
+
+            <!-- 8. LIVE SQL CONSOLE VIEW -->
+            <section id="view-sql-console" class="view-panel">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fa-solid fa-terminal"></i> Interactive SQL Database Console (A2.2 & A2.4 Verification)</h2>
+                </div>
+
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Execute custom ANSI/SQLite SQL queries directly against the live database schema (<code>patients</code>, <code>doctors</code>, <code>departments</code>, <code>appointments</code>, <code>medical_records</code>, <code>billing</code>, <code>rooms</code>).
+                    </p>
+                    <textarea id="sql-input" class="sql-editor" rows="4">SELECT p.patient_id, p.name as patient_name, d.name as doctor_name, a.appointment_date, b.net_amount, b.payment_status
+FROM appointments a
+JOIN patients p ON a.patient_id = p.patient_id
+JOIN doctors d ON a.doctor_id = d.doctor_id
+LEFT JOIN billing b ON a.appointment_id = b.appointment_id;</textarea>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="executeConsoleSQL()">
+                            <i class="fa-solid fa-play"></i> Execute Query
+                        </button>
+                        <button class="btn btn-secondary" onclick="setSampleSQL(1)">Query Patients & Doctors</button>
+                        <button class="btn btn-secondary" onclick="setSampleSQL(2)">Query Revenue Summary</button>
+                        <button class="btn btn-secondary" onclick="setSampleSQL(3)">Inspect Table Schemas</button>
+                    </div>
+                </div>
+
+                <div id="sql-result-message" style="margin-bottom: 1rem; font-weight: 500; font-size: 0.9rem;"></div>
+
+                <div class="table-container" id="sql-table-container" style="display: none;">
+                    <table class="data-table">
+                        <thead id="sql-thead"></thead>
+                        <tbody id="sql-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 9. FUNCTIONAL REQUIREMENTS DOCUMENTATION VIEW -->
+            <section id="view-requirements" class="view-panel">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fa-solid fa-book"></i> Activity A2.1: Functional Requirements Specification</h2>
+                </div>
+
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; line-height: 1.7; color: var(--text-primary);">
+                    <h3 style="color: var(--accent-blue); margin-bottom: 0.5rem; font-family: 'Outfit'; font-size: 1.3rem;">System Overview</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        The MS Hospital Management System (HMS) is a centralized, cloud-ready enterprise web application engineered to digitize hospital administration, clinical diagnostic tracking, bed inventory, patient records, appointment scheduling, and automated billing.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                        <div style="background: rgba(30, 41, 59, 0.5); padding: 1.25rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-blue);">
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;"><i class="fa-solid fa-user-injured"></i> 1. Patient Records Management (FR-1)</h4>
+                            <ul style="font-size: 0.88rem; color: var(--text-secondary); padding-left: 1.2rem;">
+                                <li>Centralized digital onboarding of Outpatients and Inpatients.</li>
+                                <li>Storage of personal demographics, blood group, contact info, and emergency contacts.</li>
+                                <li>Tracking real-time patient lifecycle status (Outpatient, Inpatient, Discharged).</li>
+                                <li>Instant historical consultation and invoice record lookup.</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: rgba(30, 41, 59, 0.5); padding: 1.25rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-emerald);">
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;"><i class="fa-solid fa-user-doctor"></i> 2. Doctor & Medical Staff Operations (FR-2)</h4>
+                            <ul style="font-size: 0.88rem; color: var(--text-secondary); padding-left: 1.2rem;">
+                                <li>Specialization-based doctor profile maintenance and fee assignment.</li>
+                                <li>Mapping doctors to designated clinical departments.</li>
+                                <li>Real-time status management (Active, On Leave, Inactive).</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: rgba(30, 41, 59, 0.5); padding: 1.25rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-purple);">
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;"><i class="fa-solid fa-calendar-check"></i> 3. Appointment Scheduling (FR-3)</h4>
+                            <ul style="font-size: 0.88rem; color: var(--text-secondary); padding-left: 1.2rem;">
+                                <li>Automated doctor slot booking with patient validation.</li>
+                                <li>Status lifecycle management (Scheduled &rarr; Completed / Cancelled).</li>
+                                <li>Prevention of double-booking and schedule conflict resolution.</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: rgba(30, 41, 59, 0.5); padding: 1.25rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-amber);">
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;"><i class="fa-solid fa-file-medical"></i> 4. Clinical EHR & Prescriptions (FR-4)</h4>
+                            <ul style="font-size: 0.88rem; color: var(--text-secondary); padding-left: 1.2rem;">
+                                <li>Logging diagnosis notes, symptoms, and treatment regimens per consultation.</li>
+                                <li>Generating digital prescriptions specifying medicine name, dosage, frequency, and duration.</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: rgba(30, 41, 59, 0.5); padding: 1.25rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-rose);">
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;"><i class="fa-solid fa-file-invoice-dollar"></i> 5. Billing & Revenue Realization (FR-5)</h4>
+                            <ul style="font-size: 0.88rem; color: var(--text-secondary); padding-left: 1.2rem;">
+                                <li>Itemized billing generation considering consultation fees, bed rates, and discounts.</li>
+                                <li>Multiple payment gateway handling (Cash, Credit Card, Insurance, UPI).</li>
+                                <li>Automated Net Amount calculation with real-time financial status tracking.</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: rgba(30, 41, 59, 0.5); padding: 1.25rem; border-radius: var(--radius-md); border-left: 4px solid #38bdf8;">
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;"><i class="fa-solid fa-bed"></i> 6. Inpatient Ward & Room Inventory (FR-6)</h4>
+                            <ul style="font-size: 0.88rem; color: var(--text-secondary); padding-left: 1.2rem;">
+                                <li>Tracking General Ward, Semi-Private, Private VIP, and ICU bed availability.</li>
+                                <li>Real-time status updates (Available, Occupied, Maintenance).</li>
+                                <li>Daily rate calculations for inpatient billing integration.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Modal 1: Register Patient -->
+    <div id="modal-patient" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus"></i> Register New Patient</h3>
+                <button class="modal-close" onclick="closeModal('modal-patient')">&times;</button>
+            </div>
+            <form id="form-patient" onsubmit="submitPatient(event)">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="p-name" class="form-control" required placeholder="e.g. Eleanor Vance">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date of Birth *</label>
+                        <input type="date" id="p-dob" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender *</label>
+                        <select id="p-gender" class="form-control" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Blood Group *</label>
+                        <select id="p-blood" class="form-control" required>
+                            <option value="O+">O+</option>
+                            <option value="A+">A+</option>
+                            <option value="B+">B+</option>
+                            <option value="AB+">AB+</option>
+                            <option value="O-">O-</option>
+                            <option value="A-">A-</option>
+                            <option value="B-">B-</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="text" id="p-phone" class="form-control" required placeholder="+1-555-0190">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="p-email" class="form-control" placeholder="patient@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Residential Address *</label>
+                    <input type="text" id="p-address" class="form-control" required placeholder="123 Health Ave, Suite 4">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact *</label>
+                    <input type="text" id="p-emergency" class="form-control" required placeholder="+1-555-9999 (Relationship)">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-patient')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Patient to SQL DB</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 1B: Edit Patient Details -->
+    <div id="modal-edit-patient" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen"></i> Update Patient Details</h3>
+                <button class="modal-close" onclick="closeModal('modal-edit-patient')">&times;</button>
+            </div>
+            <form id="form-edit-patient" onsubmit="submitEditPatient(event)">
+                <input type="hidden" id="edit-p-id">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="edit-p-name" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date of Birth *</label>
+                        <input type="date" id="edit-p-dob" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender *</label>
+                        <select id="edit-p-gender" class="form-control" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Blood Group *</label>
+                        <select id="edit-p-blood" class="form-control" required>
+                            <option value="O+">O+</option>
+                            <option value="A+">A+</option>
+                            <option value="B+">B+</option>
+                            <option value="AB+">AB+</option>
+                            <option value="O-">O-</option>
+                            <option value="A-">A-</option>
+                            <option value="B-">B-</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="text" id="edit-p-phone" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="edit-p-email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Residential Address *</label>
+                    <input type="text" id="edit-p-address" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Emergency Contact *</label>
+                        <input type="text" id="edit-p-emergency" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Admission Status *</label>
+                        <select id="edit-p-status" class="form-control" required>
+                            <option value="Outpatient">Outpatient</option>
+                            <option value="Inpatient">Inpatient</option>
+                            <option value="Discharged">Discharged</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-patient')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update in SQL DB</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Add Doctor Profile -->
+    <div id="modal-doctor" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-doctor"></i> Add Doctor Profile</h3>
+                <button class="modal-close" onclick="closeModal('modal-doctor')">&times;</button>
+            </div>
+            <form id="form-doctor" onsubmit="submitDoctor(event)">
+                <div class="form-group">
+                    <label>Doctor Name *</label>
+                    <input type="text" id="doc-name" class="form-control" required placeholder="Dr. Arthur Pendelton">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Specialization *</label>
+                        <input type="text" id="doc-spec" class="form-control" required placeholder="Cardiologist">
+                    </div>
+                    <div class="form-group">
+                        <label>Qualification *</label>
+                        <input type="text" id="doc-qual" class="form-control" required placeholder="MD, FACC">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="doc-email" class="form-control" required placeholder="arthur.p@stjude.org">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input type="text" id="doc-phone" class="form-control" required placeholder="+1-555-0300">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <select id="doc-dept" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Consulting Fee ($) *</label>
+                        <input type="number" step="0.01" id="doc-fee" class="form-control" required placeholder="150.00">
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-doctor')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Doctor Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Book Appointment -->
+    <div id="modal-appointment" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calendar-plus"></i> Schedule Appointment</h3>
+                <button class="modal-close" onclick="closeModal('modal-appointment')">&times;</button>
+            </div>
+            <form id="form-appointment" onsubmit="submitAppointment(event)">
+                <div class="form-group">
+                    <label>Select Patient *</label>
+                    <select id="app-patient" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Select Doctor *</label>
+                    <select id="app-doctor" class="form-control" required></select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Appointment Date *</label>
+                        <input type="date" id="app-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Slot *</label>
+                        <select id="app-slot" class="form-control" required>
+                            <option value="09:00 AM - 09:30 AM">09:00 AM - 09:30 AM</option>
+                            <option value="10:00 AM - 10:30 AM">10:00 AM - 10:30 AM</option>
+                            <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM</option>
+                            <option value="02:00 PM - 02:30 PM">02:00 PM - 02:30 PM</option>
+                            <option value="04:00 PM - 04:30 PM">04:00 PM - 04:30 PM</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Reason for Visit *</label>
+                    <textarea id="app-reason" class="form-control" rows="2" required placeholder="Brief description of symptoms..."></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-appointment')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Book Consultation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Log Medical Record & Prescription -->
+    <div id="modal-record" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-notes-medical"></i> Clinical Examination & Prescription</h3>
+                <button class="modal-close" onclick="closeModal('modal-record')">&times;</button>
+            </div>
+            <form id="form-record" onsubmit="submitMedicalRecord(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Patient *</label>
+                        <select id="rec-patient" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Attending Doctor *</label>
+                        <select id="rec-doctor" class="form-control" required></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Symptoms Reported *</label>
+                    <input type="text" id="rec-symptoms" class="form-control" required placeholder="High blood pressure, headache">
+                </div>
+                <div class="form-group">
+                    <label>Clinical Diagnosis *</label>
+                    <input type="text" id="rec-diagnosis" class="form-control" required placeholder="Stage 1 Essential Hypertension">
+                </div>
+                <div class="form-group">
+                    <label>Treatment Administered / Recommended *</label>
+                    <textarea id="rec-treatment" class="form-control" rows="2" required placeholder="Dietary salt restriction, oral anti-hypertensive..."></textarea>
+                </div>
+                
+                <h4 style="color: var(--accent-blue); margin: 1rem 0 0.5rem; font-size: 0.95rem;">Prescription Details (Optional)</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Medicine Name</label>
+                        <input type="text" id="rec-med-name" class="form-control" placeholder="Lisinopril 10mg">
+                    </div>
+                    <div class="form-group">
+                        <label>Dosage</label>
+                        <input type="text" id="rec-dosage" class="form-control" placeholder="1 Tablet">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Frequency</label>
+                        <input type="text" id="rec-freq" class="form-control" placeholder="Once Daily (Morning)">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (Days)</label>
+                        <input type="number" id="rec-days" class="form-control" value="14">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-record')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Record & Rx</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: Generate Billing Invoice -->
+    <div id="modal-billing" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-receipt"></i> Generate Billing Invoice</h3>
+                <button class="modal-close" onclick="closeModal('modal-billing')">&times;</button>
+            </div>
+            <form id="form-billing" onsubmit="submitBilling(event)">
+                <div class="form-group">
+                    <label>Select Patient *</label>
+                    <select id="bill-patient" class="form-control" required></select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Gross Amount ($) *</label>
+                        <input type="number" step="0.01" id="bill-gross" class="form-control" required placeholder="200.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Discount ($)</label>
+                        <input type="number" step="0.01" id="bill-discount" class="form-control" value="0.00">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Payment Status *</label>
+                        <select id="bill-status" class="form-control" required>
+                            <option value="Paid">Paid</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Partially Paid">Partially Paid</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Mode *</label>
+                        <select id="bill-mode" class="form-control" required>
+                            <option value="Cash">Cash</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Insurance">Insurance</option>
+                            <option value="UPI">UPI</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-billing')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 6: Patient Detail & History Drawer -->
+    <div id="modal-patient-detail" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-id-card"></i> Comprehensive Patient Profile</h3>
+                <button class="modal-close" onclick="closeModal('modal-patient-detail')">&times;</button>
+            </div>
+            <div id="patient-detail-content" style="font-size: 0.9rem; line-height: 1.6;">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
